@@ -67,7 +67,7 @@ class Organism
 
     public function __toString()
     {
-        return var_export($this->genotype, true) . ' ' . $this->getFitness();
+        return /*var_export($this->genotype, true) . ' ' .*/ $this->getFitness();
     }
 
     public function decodeToPhenotype(array $cityList) : array
