@@ -2,92 +2,71 @@
 
 class Organism
 {
+    private const NO_OF_CITIES = 10;
+    private const GENOTYPE_LENGTH = 10;
+
+    /** @var array */
     private $genotype;
+
+    /** @var float */
     private $fitness;
 
-    /**
-     * @return mixed
-     */
-    public function getFitness()
+    public function getFitness() : float
     {
         return $this->fitness;
     }
 
-    /**
-     * @param mixed $fitness
-     */
-    public function setFitness($fitness)
+    public function setFitness(float $fitness)
     {
         $this->fitness = $fitness;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getGenotype()
+    public function getGenotype() : array
     {
         return $this->genotype;
     }
 
-    /**
-     * Organism constructor.
-     *
-     * @param $genotype
-     */
-    public function __construct($genotype)
+    public function __construct(array $genotype)
     {
         $this->genotype = $genotype;
     }
 
     public static function fromRandom(int $length): Organism
     {
-        $genotype = '';
+        $genotype = [];
 
-        do {
-            $chr = chr(rand(97, 123));
-            if ($chr == '{') {
-                $chr = ' ';
-            }
-            $genotype .= $chr;
-        } while (--$length);
+        for ($swapPairNo = 0; $swapPairNo < static::GENOTYPE_LENGTH; ++$swapPairNo) {
+            $firstHalfOfSwapPair = rand(0,static::NO_OF_CITIES - 1);
+            $secondHalfOfSwapPair = rand(0,static::NO_OF_CITIES - 1);
+            $genotype[] = [$firstHalfOfSwapPair, $secondHalfOfSwapPair];
+        }
 
         return new self($genotype);
     }
 
-    public static function mutate(array $genotype): array {
-
+    public static function mutate(array $genotype): array
+    {
         return $genotype;
     }
 
-    public function breedWith(Organism $partner): Organism {
-
+    public function breedWith(Organism $partner): Organism
+    {
         $genotype = array_map(
-            function($chr1, $chr2) {
-                if (!mt_rand(0,99)) {
-                    $chr = chr(rand(97, 123));
-                    if ($chr == '{') {
-                        $chr = ' ';
-                    }
-
-                    return $chr;
-                }
-                return mt_rand(0,1) ? $chr1 : $chr2;
+            function($geneFromParent1, $geneFromParent2) {
+                return mt_rand(0,1) ? $geneFromParent1 : $geneFromParent2;
             },
-            str_split($this->genotype),
-            str_split($partner->genotype)
+            $this->genotype,
+            $partner->genotype
         );
 
         $genotype = self::mutate($genotype);
 
-        return new Organism(implode('', $genotype));
+        return new Organism($genotype);
 
     }
 
-
-
-    function __toString()
+    public function __toString()
     {
-        return $this->genotype . ' ' . $this->getFitness();
+        return var_export($this->genotype, true) . ' ' . $this->getFitness();
     }
-
 }
