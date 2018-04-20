@@ -5,14 +5,14 @@ require_once __DIR__ . '/vendor/autoload.php';
 const CITY_LIST = [
     [ 0.00, 100.00 ],
     [ 58.75, 80.92 ],
-    [ 95.09, 30.96 ],
-    [ 95.14, -30.81 ],
-    [ 58.88, -80.83 ],
     [ 0.16, -100.00 ],
-    [ -58.62, -81.01 ],
-    [ -95.04, -31.11 ],
-    [ -95.18, 30.66 ],
     [ -59.01, 80.73 ],
+    [ -58.62, -81.01 ],
+    [ 95.14, -30.81 ],
+    [ -95.04, -31.11 ],
+    [ 58.88, -80.83 ],
+    [ -95.18, 30.66 ],
+    [ 95.09, 30.96 ],
 ];
 
 $target = 'to be or not to be that is the question';
@@ -123,6 +123,8 @@ function fitness(array $cityList) : float
 
         $start = $nextCity;
     }
+var_dump($totalDistance);
+    $bestPossibleDistance = 628.318530718;
 
-    return 1 / $totalDistance;
+    return $bestPossibleDistance / $totalDistance;
 }

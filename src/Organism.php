@@ -3,7 +3,7 @@
 class Organism
 {
     private const NO_OF_CITIES = 10;
-    private const GENOTYPE_LENGTH = 10;
+    private const GENOTYPE_LENGTH = 20;
 
     /** @var array */
     private $genotype;
@@ -51,13 +51,23 @@ class Organism
 
     public function breedWith(Organism $partner): Organism
     {
-        $genotype = array_map(
-            function($geneFromParent1, $geneFromParent2) {
-                return mt_rand(0,1) ? $geneFromParent1 : $geneFromParent2;
-            },
-            $this->genotype,
-            $partner->genotype
-        );
+        $genotype = [];
+        for ($geneNo = 0; $geneNo < static::GENOTYPE_LENGTH; ++$geneNo) {
+            if ($geneNo < (static::GENOTYPE_LENGTH / 2)) {
+                $genotype[] = $this->genotype[$geneNo];
+            } else {
+                $genotype[] = $partner->genotype[$geneNo];
+            }
+        }
+
+
+//        $genotype = array_map(
+//            function($geneFromParent1, $geneFromParent2) {
+//                return mt_rand(0,1) ? $geneFromParent1 : $geneFromParent2;
+//            },
+//            $this->genotype,
+//            $partner->genotype
+//        );
 
         $genotype = self::mutate($genotype);
 
@@ -67,7 +77,7 @@ class Organism
 
     public function __toString()
     {
-        return /*var_export($this->genotype, true) . ' ' .*/ $this->getFitness();
+        return (string) var_export($this->genotype, true) . ' ' . $this->getFitness();
     }
 
     public function decodeToPhenotype(array $cityList) : array
