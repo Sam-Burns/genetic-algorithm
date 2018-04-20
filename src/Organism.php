@@ -69,4 +69,15 @@ class Organism
     {
         return var_export($this->genotype, true) . ' ' . $this->getFitness();
     }
+
+    public function decodeToPhenotype(array $cityList) : array
+    {
+        foreach ($this->genotype as $gene) {
+            $tmp = $cityList[$gene[0]];
+            $cityList[$gene[0]] = $cityList[$gene[1]];
+            $cityList[$gene[1]] = $tmp;
+        }
+
+        return $cityList;
+    }
 }
