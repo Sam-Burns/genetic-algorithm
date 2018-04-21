@@ -5,36 +5,36 @@ require_once __DIR__ . '/vendor/autoload.php';
 const CITY_LIST = [
     [ 0.00, 100.00 ],
     [ 58.75, 80.92 ],
-    [ 0.16, -100.00 ],
-    [ -59.01, 80.73 ],
-    [ -58.62, -81.01 ],
-    [ 95.14, -30.81 ],
-    [ -95.04, -31.11 ],
-    [ 58.88, -80.83 ],
-    [ -95.18, 30.66 ],
     [ 95.09, 30.96 ],
+    [ 95.14, -30.81 ],
+    [ 58.88, -80.83 ],
+    [ 0.16, -100.00 ],
+    [ -58.62, -81.01 ],
+    [ -95.04, -31.11 ],
+    [ -95.18, 30.66 ],
+    [ -59.01, 80.73 ]
 ];
 
-$target = 'to be or not to be that is the question';
-$length = strlen($target);
+const POPULATION_SIZE = 500;
+const MAX_EVOLUTION_CYCLES = 1000;
 
 $organisms = [];
 
-for ($i = 0; $i < 1000; $i++) {
-    $organisms[] = Organism::fromRandom($length);
+$shortestPossibleRoute = routeDistance(CITY_LIST);
+
+echo sprintf(
+    'Shortest possible route = %.2f%s',
+    $shortestPossibleRoute,
+    PHP_EOL
+);
+
+for ($i = 0; $i < POPULATION_SIZE; $i++) {
+    $organisms[] = Organism::fromRandom();
 }
 
 
-for ($i = 0; $i < 1000; $i++) {
-    $organisms = getNextGeneration($organisms, $target);
-
-    foreach ($organisms as $organism) {
-//        if ($organism->getFitness() >= 1) {
-//            var_dump($organism);
-//            var_dump($i);
-//            die();
-//        }
-    }
+for ($i = 0; $i < MAX_EVOLUTION_CYCLES; $i++) {
+    $organisms = getNextGeneration($organisms, $shortestPossibleRoute);
 }
 
 /**
@@ -43,41 +43,65 @@ for ($i = 0; $i < 1000; $i++) {
  *
  * @return array
  */
-function getNextGeneration(array $organisms, string $target)
+function getNextGeneration(array $organisms, float $shortestPossibleRoute)
 {
-    $totalFitness = 0;
+    $longestRoute = 0.0;
+    $shortestRoute = 999999999;
+    $shortestCityList = null;
 
-    $fittest = null;
-    $bestFitness = 0;
     foreach ($organisms as $organism) {
 
         $phenotype = $organism->decodeToPhenotype(CITY_LIST);
-        $fitness = fitness($phenotype);
+        $routeDistance = routeDistance($phenotype);
 
-        if ($fitness > $bestFitness) {
-            $bestFitness = $fitness;
+        if ($routeDistance > $longestRoute) {
+            $longestRoute = $routeDistance;
+        }
+
+        if ($routeDistance < $shortestRoute) {
+            $shortestRoute = $routeDistance;
+            $shortestCityList = $phenotype;
+        }
+
+        $organism->setFitness($routeDistance);
+    }
+
+    echo sprintf('Longest route = %.2f', $longestRoute), PHP_EOL;
+    echo sprintf('Shortest route = %.2f', $shortestRoute), PHP_EOL;
+
+    if ($shortestRoute <= $shortestPossibleRoute) {
+        die(
+            sprintf(
+                '*** Solved ***%sRoute: %s%s',
+                PHP_EOL,
+                json_encode($shortestCityList),
+                PHP_EOL
+            )
+        );
+    }
+
+    $totalFitness = 0;
+    $fittest = reset($organisms);
+
+    foreach ($organisms as $organism) {
+
+        $organism->setFitness($longestRoute - $organism->getFitness());
+
+        if ($organism->getFitness() > $fittest->getFitness()) {
             $fittest = $organism;
         }
-        $organism->setFitness($fitness);
 
         $totalFitness += $organism->getFitness();
     }
-    echo 'fittest: ' . $fittest . PHP_EOL;
-
 
     $nextGen = [];
 
-    for ($i = 0; $i < 1000; $i++) {
+    for ($i = 0; $i < count($organisms); $i++) {
 
         $mum = getRandomParent($organisms, $totalFitness);
         $dad = getRandomParent($organisms, $totalFitness);
 
-//        echo 'mum: ' . $mum . PHP_EOL;
-//        echo 'dad: ' . $dad . PHP_EOL;
-
         $child = $mum->breedWith($dad);
-
-//        echo 'Child: ' . $child . PHP_EOL;
 
         $nextGen[] = $child;
     }
@@ -106,7 +130,7 @@ function getRandomParent(array $organisms, $totalFitness): Organism {
     return $organism;
 }
 
-function fitness(array $cityList) : float
+function routeDistance(array $cityList) : float
 {
     $start = end($cityList);
     reset($cityList);
@@ -123,8 +147,6 @@ function fitness(array $cityList) : float
 
         $start = $nextCity;
     }
-var_dump($totalDistance);
-    $bestPossibleDistance = 628.318530718;
 
-    return $bestPossibleDistance / $totalDistance;
+    return $totalDistance;
 }

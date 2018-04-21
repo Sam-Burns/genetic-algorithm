@@ -3,7 +3,7 @@
 class Organism
 {
     private const NO_OF_CITIES = 10;
-    private const GENOTYPE_LENGTH = 20;
+    private const GENOTYPE_LENGTH = 10;
 
     /** @var array */
     private $genotype;
@@ -31,7 +31,7 @@ class Organism
         $this->genotype = $genotype;
     }
 
-    public static function fromRandom(int $length): Organism
+    public static function fromRandom(): Organism
     {
         $genotype = [];
 
@@ -51,23 +51,13 @@ class Organism
 
     public function breedWith(Organism $partner): Organism
     {
-        $genotype = [];
-        for ($geneNo = 0; $geneNo < static::GENOTYPE_LENGTH; ++$geneNo) {
-            if ($geneNo < (static::GENOTYPE_LENGTH / 2)) {
-                $genotype[] = $this->genotype[$geneNo];
-            } else {
-                $genotype[] = $partner->genotype[$geneNo];
-            }
-        }
-
-
-//        $genotype = array_map(
-//            function($geneFromParent1, $geneFromParent2) {
-//                return mt_rand(0,1) ? $geneFromParent1 : $geneFromParent2;
-//            },
-//            $this->genotype,
-//            $partner->genotype
-//        );
+        $genotype = array_map(
+            function($geneFromParent1, $geneFromParent2) {
+                return mt_rand(0,1) ? $geneFromParent1 : $geneFromParent2;
+            },
+            $this->genotype,
+            $partner->genotype
+        );
 
         $genotype = self::mutate($genotype);
 
